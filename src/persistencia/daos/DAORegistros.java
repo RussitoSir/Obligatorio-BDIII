@@ -44,7 +44,7 @@ public class DAORegistros {
 		
 		public void insback(IConexion icon, Registro reg) throws PersistenciaException {
 			Consultas consultas = new Consultas();
-			Connection con = icon.getConnection();
+			Connection con = ((Conexion)icon).getConnection();
 			try {
 				PreparedStatement ps = con.prepareStatement(consultas.ingresarRegistro());
 				ps.setInt(1, reg.getNumero());
@@ -61,7 +61,7 @@ public class DAORegistros {
 		
 		public Registro kesimo(IConexion icon, int numR) throws PersistenciaException {
 			Consultas consultas = new Consultas();
-			Connection con = icon.getConnection();
+			Connection con = ((Conexion)icon).getConnection();
 			try {
 			PreparedStatement ps = con.prepareStatement(consultas.existeRegistro());
 			ps.setInt(1, numR);
@@ -80,7 +80,7 @@ public class DAORegistros {
 		
 		public List<VORegistroListado> listarRegistros(IConexion icon) throws PersistenciaException{
 			Consultas consultas = new Consultas();
-			Connection con = icon.getConnection();
+			Connection con = ((Conexion)icon).getConnection();
 			try {
 				Statement st = con.createStatement();
 				ResultSet rs = st.executeQuery(consultas.obtenerRegistrosAlumno());
@@ -114,7 +114,7 @@ public class DAORegistros {
 		
 		public VOActividad actividadMasCursada(IConexion icon) throws PersistenciaException {
 			Consultas consultas = new Consultas();
-			Connection con = icon.getConnection();
+			Connection con = ((Conexion)icon).getConnection();
 			try {
 			PreparedStatement ps = con.prepareStatement(consultas.obtenerActividadMasCursadaPorUnAlumno());
 			ps.setInt(1, cedAlumno);

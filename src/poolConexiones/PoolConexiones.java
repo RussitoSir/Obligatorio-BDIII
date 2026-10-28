@@ -78,9 +78,9 @@ public class PoolConexiones implements IPoolConexiones{
 	public synchronized void liberarConexion(IConexion con, boolean ok) throws PersistenciaException{
 	     try {
 	           if (ok) {
-	        	   con.getConnection().commit();
+	        	   ((Conexion)con).getConnection().commit();
 	        	}else 
-	               con.getConnection().rollback();
+	        		((Conexion)con).getConnection().rollback();
 	            tope++;
 	            conexiones[tope] = (Conexion) con;
 	            notify();

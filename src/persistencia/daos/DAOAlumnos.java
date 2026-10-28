@@ -1,5 +1,6 @@
 package persistencia.daos;
 
+import poolConexiones.Conexion;
 import poolConexiones.IConexion;
 
 import java.sql.Connection;
@@ -18,7 +19,7 @@ public class DAOAlumnos {
 	public boolean member(IConexion icon, int cedA) throws PersistenciaException {
 		boolean existe = false;
 		Consultas consultas = new Consultas();
-		Connection con = icon.getConnection();
+		Connection con = ((Conexion)icon).getConnection();
 		try {
 		PreparedStatement ps = con.prepareStatement(consultas.existeAlumno());
 		ps.setInt(1, cedA);
@@ -36,7 +37,7 @@ public class DAOAlumnos {
 	
 	public void insert(IConexion icon, Alumno alu) throws PersistenciaException {
 		Consultas consultas = new Consultas();
-		Connection con = icon.getConnection();
+		Connection con = ((Conexion)icon).getConnection();
 		try {
 			PreparedStatement ps = con.prepareStatement(consultas.ingresoAlumno());
 			ps.setInt(1, alu.getCedula());
@@ -52,7 +53,7 @@ public class DAOAlumnos {
 	
 	public Alumno find(IConexion icon, int cedA) throws PersistenciaException {
 		Consultas consultas = new Consultas();
-		Connection con = icon.getConnection();
+		Connection con = ((Conexion)icon).getConnection();
 		try {
 		PreparedStatement ps = con.prepareStatement(consultas.existeAlumno());
 		ps.setInt(1, cedA);
@@ -71,7 +72,7 @@ public class DAOAlumnos {
 	public boolean esVacio(IConexion icon) throws PersistenciaException {
 		boolean es = true;
 		Consultas consultas = new Consultas();
-		Connection con = icon.getConnection();
+		Connection con = ((Conexion)icon).getConnection();
 		try {
 		Statement st = con.createStatement();
 		ResultSet rs = st.executeQuery(consultas.devolverAlumnosOrdenados());
