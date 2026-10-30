@@ -1,26 +1,22 @@
 package logica;
 
-import java.io.FileInputStream;  
-import java.io.IOException;
+
 import java.rmi.RemoteException;
-import java.sql.DriverManager;
-import java.sql.SQLException;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.List;
-
+import persistencia.daos.DAOAlumnos;
 import logica.excepciones.*;
 import logica.valueObjects.*;
-
 import java.util.ArrayList;
-
-import persistencia.consultas.*;
 import poolConexiones.*;
 
 public class Fachada extends UnicastRemoteObject implements IFachada {
 	private IPoolConexiones pool;
+	private DAOAlumnos diccionario;
 	
 	public Fachada() throws RemoteException, PersistenciaException{
 			pool = new PoolConexiones();
+			diccionario = new DAOAlumnos();
 	}
 	
 	public void nuevoAlumno(VOAlumno voA) throws RemoteException, PersistenciaException, YaExisteAlumnoException{
@@ -29,9 +25,9 @@ public class Fachada extends UnicastRemoteObject implements IFachada {
 		boolean errorPersistencia = false;
 		boolean errorExisteAlumno = false;
 		try {
-			AccesoBD abd = new AccesoBD();
-			if(!abd.existeAlumno(con, voA.getCedula())) {
-				abd.ingresoAlumno(con, voA.getCedula(), voA.getNombre(), voA.getApellido());
+			if(!diccionario.member(con, voA.getCedula())) {
+				Alumno alu = new Alumno(voA.getCedula(), voA.getNombre(), voA.getApellido());
+				diccionario.insert(con, alu);
 			}else {
 				errorExisteAlumno = true;
 				msgError = "Ya existe un alumno con la cedula ingresada";
@@ -61,12 +57,13 @@ public class Fachada extends UnicastRemoteObject implements IFachada {
 		boolean errorPersistencia = false;
 		boolean errorNoExisteAlumno = false;
 		try {
-			AccesoBD abd = new AccesoBD();
-			if(!abd.existeAlumno(con, cedA)) {
+			if(!diccionario.member(con, cedA)) {
 				errorNoExisteAlumno = true;
 				msgError = "No existe un alumno con la cedula ingresada";
 			}else {
-				abd.ingresarRegistro(con, abd.numRegistro(con, cedA), cedA, voR.getActividad(), voR.getNota());
+				Alumno alu = diccionario.find(con, cedA);
+				Registro registro = new Registro(alu.cantidadRegistros(con) +1, voR.getNota(), voR.getActividad());
+				alu.agregarRegistro(con, registro);
 			}
 		}
 		catch(Exception e) {
@@ -92,9 +89,7 @@ public class Fachada extends UnicastRemoteObject implements IFachada {
 		boolean errorPersistencia = false;
 		List<VOAlumno> lista = new ArrayList<>();
 		try {
-			AccesoBD abd = new AccesoBD();
-			lista =  abd.devolverAlumnosOrdenados(con);
-			return lista;
+			return diccionario.listarAlumnos(con);
 		}
 		catch(Exception e) {
 			errorPersistencia = true;
@@ -117,21 +112,24 @@ public class Fachada extends UnicastRemoteObject implements IFachada {
 		boolean errorPersistencia = false;
 		boolean errorNoExisteAlumno = false;
 		boolean errorNoExisteRegistro = false;
+		VORegistro resu = null;
 		try {
-			AccesoBD abd = new AccesoBD();
-			if(!abd.existeAlumno(con, cedA)) {
+			if(!diccionario.member(con, cedA)) {
 				errorNoExisteAlumno = true;
 				msgError = "No existe un alumno con la cedula ingresada";
-				throw new CedulaInexistenteException(msgError);
-			}else if(!abd.existeRegistro(con, numR, cedA)){
-				errorNoExisteRegistro = true;
-				msgError = "No existe un registro con el numero ingresado para el alumno seleccionado";
-				throw new RegistroNoExisteException(msgError);
 			}else {
-				return abd.obtenerRegistro(con, numR, cedA);
+				Alumno alu = diccionario.find(con, cedA);
+				if(alu.cantidadRegistros(con)!= numR){
+					errorNoExisteRegistro = true;
+					msgError = "No existe un registro con el numero ingresado para el alumno seleccionado";
+			}else {
+				resu = alu.obtenerRegistro(con, numR);
 				}
+			}
+			return resu;
 			
 		}
+		
 		catch(Exception e) {
 			errorPersistencia = true;
 			msgError = "Error en acceso a datos";
@@ -160,12 +158,11 @@ public class Fachada extends UnicastRemoteObject implements IFachada {
 		boolean errorNoExisteAlumno = false;
 		List<VORegistroListado> lista = new ArrayList<>();
 		try {
-			AccesoBD abd = new AccesoBD();
-			if(!abd.existeAlumno(con, cedA)) {
+			if(!diccionario.member(con, cedA)) {
 				errorNoExisteAlumno = true;
 				msgError = "No existe un alumno con la cedula ingresada";
 			}else {
-				lista = abd.obtenerRegistrosAlumno(con, cedA);
+				return diccionario.find(con, cedA).listarRegistros(con);
 			}
 			return lista;
 		}
@@ -195,20 +192,12 @@ public class Fachada extends UnicastRemoteObject implements IFachada {
 		boolean errorNoExisteAlumno = false;
 		double promedio = 0.0;
 		try {
-			AccesoBD abd = new AccesoBD();
-			if(!abd.existeAlumno(con, cedA)) {
+			if(!diccionario.member(con, cedA)) {
 				errorNoExisteAlumno = true;
 				msgError = "No existe un alumno con la cedula ingresada";
 				return promedio;
-			}else {
-				int cant = 0;
-				List<VORegistroListado> lista = abd.obtenerRegistrosAlumno(con, cedA);
-				for(VORegistroListado i : lista) {
-					promedio += i.getNota();
-					cant++;
-				}
-				return promedio /= cant;
-			}
+			}else 
+				return diccionario.find(con, cedA).promedioNotas(con);
 		}
 		catch(Exception e) {
 			errorPersistencia = true;
@@ -232,28 +221,19 @@ public class Fachada extends UnicastRemoteObject implements IFachada {
 		String msgError = "";
 		boolean errorPersistencia = false;
 		boolean errorNingunAlumno = false;
+		VOAlumnoProm resu = null;
 		try {
-			AccesoBD abd = new AccesoBD();
-			if(!abd.hayAlumnos(con)) {
+			if(diccionario.esVacio(con)) {
 				errorNingunAlumno = true;
 				msgError = "No hay ningun alumno registrado";
-				throw new NingunAlumnoException(msgError);
-			}else {
-				List<VOAlumno> alumnos = abd.devolverAlumnosOrdenados(con);
-				VOAlumnoProm alumnoMayorPromedio = new VOAlumnoProm(alumnos.get(0).getCedula(), alumnos.get(0).getNombre(), alumnos.get(0).getApellido(), promedioNotas(alumnos.get(0).getCedula()));
-				for(VOAlumno i : alumnos ) {
-					if(alumnoMayorPromedio.getPromedio()<promedioNotas(i.getCedula()))
-						alumnoMayorPromedio = new VOAlumnoProm(i.getCedula(), i.getNombre(), i.getApellido(), promedioNotas(i.getCedula()));
-				}
-				return alumnoMayorPromedio;
-				}
-				
-			
-		}
+			}else 
+				resu = diccionario.alumnoMayorPromedio(con);
+			return resu;
+			}
 		catch(Exception e) {
 			errorPersistencia = true;
 			msgError = "Error en acceso a datos";
-			throw new PersistenciaException(msgError);
+			return resu;
 		}
 		finally {
 			if(errorPersistencia) {
@@ -272,14 +252,15 @@ public class Fachada extends UnicastRemoteObject implements IFachada {
 		IConexion con = pool.obtenerConexion(false);
 		String msgError = "";
 		boolean errorPersistencia = false;
+		int resu = 0;
 		try {
-			AccesoBD abd = new AccesoBD();
-			return abd.obtenerCantidadAlumnosActividadConNota(con, act, nota);
+			resu = diccionario.contarAlumnos(con, act, nota);
+			return resu;
 		}
 		catch(Exception e) {
 			errorPersistencia = true;
 			msgError = "Error en acceso a datos";
-			throw new PersistenciaException(msgError);
+			return resu;
 		}
 		finally {
 			if(errorPersistencia) {
@@ -293,30 +274,31 @@ public class Fachada extends UnicastRemoteObject implements IFachada {
 	
 	
 	
-	public VOActividad actividadMasCursada(int cedA) throws RemoteException, PersistenciaException, CedulaInexistenteException, RegistroNoExisteException{
+	public VOActividad actividadMasCursada(int cedA) throws RemoteException, PersistenciaException, CedulaInexistenteException, NingunaActividadException{
 		IConexion con = pool.obtenerConexion(false);
 		String msgError = "";
 		boolean errorPersistencia = false;
 		boolean errorNoExisteAlumno = false;
-		boolean errorNoExisteRegistro = false;
+		boolean errorNingunRegistro = false;
+		VOActividad resu = null;
 		try {
-			AccesoBD abd = new AccesoBD();
-			if(!abd.existeAlumno(con, cedA)) {
+			if(!diccionario.member(con, cedA)) {
 				errorNoExisteAlumno = true;
 				msgError = "No existe un alumno con la cedula ingresada";
-				throw new CedulaInexistenteException(msgError);
-			}else if(!abd.existeAlgunRegistroAlumno(con, cedA)) {
-				errorNoExisteRegistro = true;
-				msgError = "No existe ninguna actividad para el alumno ingresado";
-				throw new RegistroNoExisteException(msgError);
 			}else {
-				return abd.obtenerActividadMasCursadaPorUnAlumno(con, cedA);
+				Alumno alu = diccionario.find(con, cedA);
+				if(alu.cantidadRegistros(con) == 0) {
+					errorNingunRegistro = true;
+					msgError = "No existe ninguna actividad para el alumno ingresado";
+				}else 
+				resu = alu.actividadMasCursada(con);
 			}
+			return resu;
 		}
 		catch(Exception e) {
 			errorPersistencia = true;
 			msgError = "Error en acceso a datos";
-			throw new PersistenciaException(msgError);
+			
 		}
 		finally {
 			if(errorPersistencia) {
@@ -325,11 +307,15 @@ public class Fachada extends UnicastRemoteObject implements IFachada {
 			}else if(errorNoExisteAlumno) {
 				pool.liberarConexion(con, false);
 				throw new CedulaInexistenteException(msgError);
-			}else if(errorNoExisteRegistro) {
+			}else if(errorNingunRegistro) {
 				pool.liberarConexion(con, false);
-				throw new RegistroNoExisteException(msgError);
-			}else
+				throw new NingunaActividadException(msgError);
+			}else {
 				pool.liberarConexion(con, true);
+				throw new NingunaActividadException(msgError);
+				
+			}
+				
 		
 	}
 	

@@ -26,7 +26,7 @@ public interface IFachada extends Remote {
 	
 	public int contarAlumnos(String act, int nota) throws RemoteException, PersistenciaException;
 	
-	public VOActividad actividadMasCursada(int cedA) throws RemoteException, PersistenciaException, CedulaInexistenteException, RegistroNoExisteException;
+	public VOActividad actividadMasCursada(int cedA) throws RemoteException, PersistenciaException, CedulaInexistenteException, NingunaActividadException;
 	
 	
 

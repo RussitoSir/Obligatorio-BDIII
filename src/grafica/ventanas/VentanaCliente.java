@@ -53,7 +53,7 @@ public class VentanaCliente extends JFrame {
 	
 
 
-	// --- PESTAÑA 1: ALTA DE POSTRE (Req. 1) ---
+
 	private void initPanelNuevoAlumno() {
 		// Inicio el Panel
 		JPanel panel = new JPanel(null);
@@ -106,7 +106,7 @@ public class VentanaCliente extends JFrame {
 
 	}
 
-	// --- PESTAÑA 2: LISTADO DETALLADO POSTRES ---
+
 	private void initPanelRegistrarNota() {
 		// Inicio el Panel
 		JPanel panel = new JPanel(null);
