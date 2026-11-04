@@ -88,8 +88,10 @@ public class Fachada extends UnicastRemoteObject implements IFachada {
 		String msgError = "";
 		boolean errorPersistencia = false;
 		List<VOAlumno> lista = new ArrayList<>();
+		System.out.println("todavia no tiro nada");
 		try {
-			return diccionario.listarAlumnos(con);
+			lista = diccionario.listarAlumnos(con);
+			return lista;
 		}
 		catch(Exception e) {
 			errorPersistencia = true;
@@ -100,8 +102,10 @@ public class Fachada extends UnicastRemoteObject implements IFachada {
 			if(errorPersistencia) {
 				pool.liberarConexion(con, false);
 				throw new PersistenciaException(msgError);
-			}else
+			}else {
 				pool.liberarConexion(con, true);
+			}
+				
 			}
 	}
 	
@@ -298,7 +302,7 @@ public class Fachada extends UnicastRemoteObject implements IFachada {
 		catch(Exception e) {
 			errorPersistencia = true;
 			msgError = "Error en acceso a datos";
-			
+			return resu;
 		}
 		finally {
 			if(errorPersistencia) {
@@ -310,12 +314,8 @@ public class Fachada extends UnicastRemoteObject implements IFachada {
 			}else if(errorNingunRegistro) {
 				pool.liberarConexion(con, false);
 				throw new NingunaActividadException(msgError);
-			}else {
+			}else
 				pool.liberarConexion(con, true);
-				throw new NingunaActividadException(msgError);
-				
-			}
-				
 		
 	}
 	

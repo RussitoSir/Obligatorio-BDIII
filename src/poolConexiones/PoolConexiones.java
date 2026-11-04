@@ -62,7 +62,7 @@ public class PoolConexiones implements IPoolConexiones{
 	        
 	        if (conexion != null) {
 	            Connection con = conexion.getConnection();
-	            con.setAutoCommit(!modifica);
+	            con.setAutoCommit(false);
 	            con.setTransactionIsolation(nivelTransaccionalidad);
 	        }
 	    	}
@@ -86,6 +86,7 @@ public class PoolConexiones implements IPoolConexiones{
 	            notify();
 	            
 	        } catch (SQLException e) {
+	        	e.printStackTrace();
 	        	throw new PersistenciaException("Error en el acceso a datos");
 	        }
 	    }

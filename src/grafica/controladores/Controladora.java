@@ -72,6 +72,42 @@ public class Controladora {
 
 		}
 	}
+	
+	
+	public List<VOAlumno> listarAlumnos() {
+		List<VOAlumno> lista = new ArrayList<>();
+		try {
+			lista = fachada.listarAlumnos();
+		} catch (PersistenciaException e) {
+			ven.mostrarMensaje(e.getMessage());
+		} catch (RemoteException e) {
+			ven.mostrarMensaje("No se pudo conectar al servidor");
+
+		}
+		finally {
+		return lista;
+		}
+	}
+	
+	
+	public VORegistro obtenerRegistro(int cedA, int numR) {
+		VORegistro registro = new VORegistro("N/A", 0);
+		try {
+			registro = fachada.obtenerRegistro(cedA, numR);
+		} catch (PersistenciaException e) {
+			ven.mostrarMensaje(e.getMessage());
+		} catch (RemoteException e) {
+			ven.mostrarMensaje("No se pudo conectar al servidor");
+		} catch (RegistroNoExisteException e) {
+			ven.mostrarMensaje(e.getMessage());
+		} catch (CedulaInexistenteException e) {
+			ven.mostrarMensaje(e.getMessage());
+
+		}
+		finally {
+		return registro;
+		}
+	}
 
 	
 

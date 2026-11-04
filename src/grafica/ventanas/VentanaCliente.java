@@ -1,16 +1,21 @@
 package grafica.ventanas;
 
-import java.awt.BorderLayout;  
+import java.awt.BorderLayout;   
 import java.awt.Color;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
+import javax.swing.JTextArea;
 import javax.swing.JTextField;
 
 import grafica.controladores.Controladora;
+import logica.valueObjects.VOAlumno;
+import logica.valueObjects.VORegistro;
+
 
 
 public class VentanaCliente extends JFrame {
@@ -41,8 +46,10 @@ public class VentanaCliente extends JFrame {
 	}
 
 	private void initPaneles() {
-		initPanelNuevoAlumno(); // 1: Alta
-		initPanelRegistrarNota(); // 2: Detalle Atributos
+		initPanelNuevoAlumno(); 
+		initPanelRegistrarNota(); 
+		initPanelListadoAlumnos();
+		initPanelListarRegistro();
 	}
 	
 	public void mostrarMensaje(String mensaje ) { 
@@ -157,6 +164,84 @@ public class VentanaCliente extends JFrame {
 		
 		
 
+	}
+	
+	
+	private void initPanelListadoAlumnos() {
+		// 1. Cambiamos BorderLayout por null
+		JPanel panel = new JPanel(null);
+		Color azul = new Color(85, 110, 145);
+		panel.setBackground(azul);
+		tabbedPane.addTab("Listado Alumnos", panel);
+
+		// 2. Definimos el botón con un tamaño fijo
+		JButton btnVer = new JButton("LISTAR ALUMNOS");
+		btnVer.setBounds(20, 20, 250, 30); // x, y, ancho, alto
+		panel.add(btnVer);
+
+		JTextArea txtArea = new JTextArea();
+		txtArea.setEditable(false);
+
+		// 3. Metemos el JTextArea en el JScrollPane y le damos tamaño al SCROLL
+		JScrollPane scroll = new JScrollPane(txtArea);
+		scroll.setBounds(20, 60, 600, 300); // Aquí controlas que no ocupe toda la pantalla
+		panel.add(scroll);
+
+		btnVer.addActionListener(e -> {
+			txtArea.setText("");
+			for (VOAlumno a : controlador.listarAlumnos()) {
+				txtArea.append("CI: " + a.getCedula() + " | Nombre: " + a.getNombre() + " | Apellido:" + a.getApellido());
+				txtArea.append("\n");
+			}
+		});
+	}
+	
+	
+	private void initPanelListarRegistro() {
+		// 1. Cambiamos BorderLayout por null
+		JPanel panel = new JPanel(null);
+		Color azul = new Color(85, 110, 145);
+		Color blanco = new Color(236, 240, 241);
+		panel.setBackground(azul);
+		tabbedPane.addTab("Listar Registro", panel);
+		
+		JTextField txtCedula = new JTextField();
+		txtCedula.setBounds(20, 40, 80, 25);
+		panel.add(txtCedula);
+		
+		JTextField txtNumero = new JTextField();
+		txtNumero.setBounds(110, 40, 150, 25);
+		panel.add(txtNumero);
+		
+		JLabel lblNewLabel = new JLabel("Cedula Alumno");
+		lblNewLabel.setBounds(20, 15, 90, 14);
+		lblNewLabel.setForeground(blanco);
+		panel.add(lblNewLabel);
+
+		JLabel lblNumero = new JLabel("Numero Registro");
+		lblNumero.setBounds(110, 15, 150, 14);
+		lblNumero.setForeground(blanco);
+		panel.add(lblNumero);
+		
+		// 2. Definimos el botón con un tamaño fijo
+		JButton btnVer = new JButton("LISTAR REGISTRO");
+		btnVer.setBounds(20, 100, 250, 30); // x, y, ancho, alto
+		panel.add(btnVer);
+
+		JTextArea txtArea = new JTextArea();
+		txtArea.setEditable(false);
+
+		// 3. Metemos el JTextArea en el JScrollPane y le damos tamaño al SCROLL
+		JScrollPane scroll = new JScrollPane(txtArea);
+		scroll.setBounds(20, 150, 500, 100); // Aquí controlas que no ocupe toda la pantalla 
+		panel.add(scroll);
+
+		btnVer.addActionListener(e -> {
+			txtArea.setText("");
+			VORegistro a = controlador.obtenerRegistro(Integer.parseInt(txtCedula.getText()), Integer.parseInt(txtNumero.getText()));
+				txtArea.append("Actividad: " + a.getActividad() + " | Nota: " + a.getNota());
+				txtArea.append("\n");
+		});
 	}
 	
 }
