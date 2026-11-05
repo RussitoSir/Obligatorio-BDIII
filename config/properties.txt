@@ -1,7 +1,7 @@
 driver = com.mysql.jdbc.Driver
-url = jdbc:mysql://localhost:3306/Bedelia
-usuario = root
-password = admin
+url = jdbc:mysql://localhost:3306/Colegio
+usuario = emiliano
+password = 050600
 
 
 ipServidor = 127.0.0.1

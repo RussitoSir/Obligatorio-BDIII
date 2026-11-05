@@ -82,15 +82,16 @@ public class DAORegistros {
 			Consultas consultas = new Consultas();
 			Connection con = ((Conexion)icon).getConnection();
 			try {
-				Statement st = con.createStatement();
-				ResultSet rs = st.executeQuery(consultas.obtenerRegistrosAlumno());
+				PreparedStatement ps = con.prepareStatement(consultas.obtenerRegistrosAlumno());
+				ps.setInt(1, cedAlumno);
+				ResultSet rs = ps.executeQuery();
 				List<VORegistroListado> registros = new ArrayList<>();
 				while(rs.next()) {
 					VORegistroListado actual = new VORegistroListado(rs.getString(3), rs.getInt(4), rs.getInt(1));
 					registros.add(actual);
 				}
 				rs.close();
-				st.close();
+				ps.close();
 				return registros;
 				}
 				catch(SQLException e) {

@@ -109,6 +109,74 @@ public class Controladora {
 		}
 	}
 
+	public double promedioNotas(int cedA) {
+		double promedio = 0.0;
+		try {
+			promedio = fachada.promedioNotas(cedA);
+		} catch (PersistenciaException e) {
+			ven.mostrarMensaje(e.getMessage());
+		} catch (RemoteException e) {
+			ven.mostrarMensaje("No se pudo conectar al servidor");
+		} catch (CedulaInexistenteException e) {
+			ven.mostrarMensaje(e.getMessage());
+		}
+		finally {
+		return promedio;
+		}
+	}
 	
+	public VOAlumnoProm alumnoMayorPromedio(){
+		VOAlumnoProm alumno = null;
+		try {
+			alumno = fachada.alumnoMayorPromedio();
+		} catch (PersistenciaException e) {
+			ven.mostrarMensaje(e.getMessage());
+		} catch (NingunAlumnoException e) {
+			ven.mostrarMensaje(e.getMessage());
+		} catch (RemoteException e) {
+			ven.mostrarMensaje("No se pudo conectar al servidor");
+
+		}
+		finally {
+			return alumno;
+		}
+	}
+
+	public int contarAlumnos(String act, int nota){
+		int cant = 0;
+		
+		try {
+			cant = fachada.contarAlumnos(act, nota);
+		} catch (PersistenciaException e) {
+			ven.mostrarMensaje(e.getMessage());
+		} catch (RemoteException e) {
+			ven.mostrarMensaje("No se pudo conectar al servidor");
+
+		}
+		finally {
+			return cant;
+		}
+	}
+	
+	public VOActividad actividadMasCursada(int ced){
+		VOActividad act = null;
+		
+		try {
+			act = fachada.actividadMasCursada(ced);
+		} catch (PersistenciaException e) {
+			ven.mostrarMensaje(e.getMessage());
+		} catch (RemoteException e) {
+			ven.mostrarMensaje("No se pudo conectar al servidor");
+		}
+		 catch (CedulaInexistenteException e) {
+				ven.mostrarMensaje("No se encontro el alumno.");
+			}
+		 catch (NingunaActividadException e) {
+				ven.mostrarMensaje("No se encontro la actividad.");
+			}
+		finally {
+			return act;
+		}
+	}
 
 }

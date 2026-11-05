@@ -132,8 +132,10 @@ public class DAOAlumnos {
 			Alumno alumnoActual = new Alumno(i.getCedula(), i.getNombre(), i.getApellido());
 			List<VORegistroListado> registros = alumnoActual.listarRegistros(icon);
 			for(VORegistroListado j : registros) {
-				if(j.getActividad() == act && j.getNota() == nota)
+				if(j.getActividad().equalsIgnoreCase(act) && j.getNota() == nota) {
 					cant++;
+					break;
+				}
 			}	
 	}
 		return cant;

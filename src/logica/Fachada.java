@@ -204,8 +204,9 @@ public class Fachada extends UnicastRemoteObject implements IFachada {
 				return diccionario.find(con, cedA).promedioNotas(con);
 		}
 		catch(Exception e) {
+			e.printStackTrace();
 			errorPersistencia = true;
-			msgError = "Error en acceso a datos";
+			msgError = "Error en acceso a datos: " + e.getMessage();
 			return promedio;
 		}
 		finally {

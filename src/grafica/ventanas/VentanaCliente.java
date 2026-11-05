@@ -14,7 +14,9 @@ import javax.swing.JTextField;
 
 import grafica.controladores.Controladora;
 import logica.valueObjects.VOAlumno;
+import logica.valueObjects.VOAlumnoProm;
 import logica.valueObjects.VORegistro;
+import logica.valueObjects.VOActividad;
 
 
 
@@ -50,6 +52,10 @@ public class VentanaCliente extends JFrame {
 		initPanelRegistrarNota(); 
 		initPanelListadoAlumnos();
 		initPanelListarRegistro();
+		initPanelPromedioNotas();
+		initPanelAlumnoMayorPromedio();
+		initPanelContarAlumnos();
+		initPanelActividadMasCursada();
 	}
 	
 	public void mostrarMensaje(String mensaje ) { 
@@ -244,4 +250,173 @@ public class VentanaCliente extends JFrame {
 		});
 	}
 	
+	private void initPanelPromedioNotas() {
+		// 1. Cambiamos BorderLayout por null
+		JPanel panel = new JPanel(null);
+		Color azul = new Color(85, 110, 145);
+		Color blanco = new Color(236, 240, 241);
+		panel.setBackground(azul);
+		tabbedPane.addTab("Promedio notas", panel);
+		
+		JTextField txtCedula = new JTextField();
+		txtCedula.setBounds(20, 40, 80, 25);
+		panel.add(txtCedula);
+		
+		JLabel lblNewLabel = new JLabel("Cedula Alumno");
+		lblNewLabel.setBounds(20, 15, 90, 14);
+		lblNewLabel.setForeground(blanco);
+		panel.add(lblNewLabel);
+		
+		// 2. Definimos el botón con un tamaño fijo
+		JButton btnVer = new JButton("OBTENER PROMEDIO");
+		btnVer.setBounds(20, 100, 250, 30); // x, y, ancho, alto
+		panel.add(btnVer);
+
+		JTextArea txtArea = new JTextArea();
+		txtArea.setEditable(false);
+
+		// 3. Metemos el JTextArea en el JScrollPane y le damos tamaño al SCROLL
+		JScrollPane scroll = new JScrollPane(txtArea);
+		scroll.setBounds(20, 150, 500, 100); // Aquí controlas que no ocupe toda la pantalla 
+		panel.add(scroll);
+
+		btnVer.addActionListener(e -> {
+			txtArea.setText("");
+			double promedio = controlador.promedioNotas(Integer.parseInt(txtCedula.getText()));
+
+				txtArea.append("Promedio de notas: " + promedio);
+				txtArea.append("\n");
+		});
+	}
+	
+	private void initPanelAlumnoMayorPromedio() {
+		// 1. Cambiamos BorderLayout por null
+		JPanel panel = new JPanel(null);
+		Color azul = new Color(85, 110, 145);
+		Color blanco = new Color(236, 240, 241);
+		panel.setBackground(azul);
+		tabbedPane.addTab("Alumno de mayor promedio", panel);
+		
+		
+		// 2. Definimos el botón con un tamaño fijo
+		JButton btnVer = new JButton("OBTENER ALUMNO");
+		btnVer.setBounds(20, 100, 250, 30); // x, y, ancho, alto
+		panel.add(btnVer);
+
+		JTextArea txtArea = new JTextArea();
+		txtArea.setEditable(false);
+
+		// 3. Metemos el JTextArea en el JScrollPane y le damos tamaño al SCROLL
+		JScrollPane scroll = new JScrollPane(txtArea);
+		scroll.setBounds(20, 150, 500, 100); // Aquí controlas que no ocupe toda la pantalla 
+		panel.add(scroll);
+
+		btnVer.addActionListener(e -> {
+			txtArea.setText("");
+			VOAlumnoProm alumno = controlador.alumnoMayorPromedio();
+
+				txtArea.append("Cedula: " + alumno.getCedula() + "\n");
+				txtArea.append("Nombre: " + alumno.getNombre() + "\n");
+				txtArea.append("Apellido: " + alumno.getApellido() + "\n");
+				txtArea.append("Promedio: " + alumno.getPromedio());
+				txtArea.append("\n");
+		});
+	}
+	
+	
+	private void initPanelContarAlumnos() {
+		// 1. Cambiamos BorderLayout por null
+		JPanel panel = new JPanel(null);
+		Color azul = new Color(85, 110, 145);
+		Color blanco = new Color(236, 240, 241);
+		panel.setBackground(azul);
+		tabbedPane.addTab("Cantidad Alumnos", panel);
+		
+		JTextField txtActividad = new JTextField();
+		txtActividad.setBounds(20, 40, 150, 25);
+		panel.add(txtActividad);
+
+		JTextField txtNota = new JTextField();
+		txtNota.setBounds(180, 40, 80, 25);
+		panel.add(txtNota);
+		
+		// 2. Definimos el botón con un tamaño fijo
+		JButton btnVer = new JButton("OBTENER CANTIDAD");
+		btnVer.setBounds(20, 100, 250, 30); // x, y, ancho, alto
+		panel.add(btnVer);
+
+		JTextArea txtArea = new JTextArea();
+		txtArea.setEditable(false);
+
+		// 3. Metemos el JTextArea en el JScrollPane y le damos tamaño al SCROLL
+		JScrollPane scroll = new JScrollPane(txtArea);
+		scroll.setBounds(20, 150, 500, 100); // Aquí controlas que no ocupe toda la pantalla 
+		panel.add(scroll);
+
+		btnVer.addActionListener(e -> {
+			txtArea.setText("");
+			try {
+				int nota = Integer.parseInt(txtNota.getText());
+				int cant = controlador.contarAlumnos(txtActividad.getText(), nota);
+				txtArea.append("Cant. Total de alumnos con actividad '" + txtActividad.getText() + "' y nota " + nota + ": " + cant);
+				txtArea.append("\n");
+			} catch (NumberFormatException ex) {
+				mostrarMensaje("La nota debe ser un número entero");
+			}
+		});
+		
+
+		JLabel lblActividad = new JLabel("Actividad");
+		lblActividad.setBounds(20, 15, 80, 14);
+		lblActividad.setForeground(blanco);
+		panel.add(lblActividad);
+
+		JLabel lblNota = new JLabel("Nota");
+		lblNota.setBounds(180, 15, 46, 14);
+		lblNota.setForeground(blanco);
+		panel.add(lblNota);
+
+	}
+	
+	private void initPanelActividadMasCursada() {
+		JPanel panel = new JPanel(null);
+		Color azul = new Color(85, 110, 145);
+		Color blanco = new Color(236, 240, 241);
+		panel.setBackground(azul);
+		tabbedPane.addTab("Actividad más cursada", panel);
+		
+		JTextField txtCedula = new JTextField();
+		txtCedula.setBounds(20, 40, 100, 25);
+		panel.add(txtCedula);
+		
+		JLabel lblCedula = new JLabel("Cédula Alumno");
+		lblCedula.setBounds(20, 15, 120, 14);
+		lblCedula.setForeground(blanco);
+		panel.add(lblCedula);
+
+		JButton btnVer = new JButton("OBTENER ACTIVIDAD");
+		btnVer.setBounds(20, 100, 250, 30);
+		panel.add(btnVer);
+
+		JTextArea txtArea = new JTextArea();
+		txtArea.setEditable(false);
+
+		JScrollPane scroll = new JScrollPane(txtArea);
+		scroll.setBounds(20, 150, 500, 100);
+		panel.add(scroll);
+
+		btnVer.addActionListener(e -> {
+			txtArea.setText("");
+			try {
+				int ced = Integer.parseInt(txtCedula.getText());
+				VOActividad act = controlador.actividadMasCursada(ced);
+				if (act != null) {
+					txtArea.append("Actividad más cursada: " + act.getActividad() + "\n");
+					txtArea.append("Cantidad de veces cursada: " + act.getVeces() + "\n");
+				}
+			} catch (NumberFormatException ex) {
+				mostrarMensaje("La cédula debe ser un número entero");
+			}
+		});
+	}
 }
