@@ -88,7 +88,6 @@ public class Fachada extends UnicastRemoteObject implements IFachada {
 		String msgError = "";
 		boolean errorPersistencia = false;
 		List<VOAlumno> lista = new ArrayList<>();
-		System.out.println("todavia no tiro nada");
 		try {
 			lista = diccionario.listarAlumnos(con);
 			return lista;
@@ -123,7 +122,7 @@ public class Fachada extends UnicastRemoteObject implements IFachada {
 				msgError = "No existe un alumno con la cedula ingresada";
 			}else {
 				Alumno alu = diccionario.find(con, cedA);
-				if(alu.cantidadRegistros(con)!= numR){
+				if(alu.cantidadRegistros(con)< numR){
 					errorNoExisteRegistro = true;
 					msgError = "No existe un registro con el numero ingresado para el alumno seleccionado";
 			}else {
